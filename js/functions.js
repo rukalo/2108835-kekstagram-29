@@ -1,3 +1,5 @@
+const MINUTES_IN_HOUR = 60;
+
 const isStringMaxLenght = (string, maxLength) => string.lenght <= maxLength;
 
 isStringMaxLenght ('проверяемая строка', 20);
@@ -30,3 +32,20 @@ const returnNumber = (text) => {
 };
 
 returnNumber('2023 год');
+
+
+function MeetTime(startWork, endWork, startMeeting, meetingTimeMinutes) {
+  const getMinutes = (timeString) => {
+    const time = timeString.split(':');
+
+    return Number(time[0]) * MINUTES_IN_HOUR + Number(time[1]);
+  };
+
+  const startWorkMinutes = getMinutes(startWork);
+  const endWorkMinutes = getMinutes(endWork);
+  const startMeetingMinutes = getMinutes(startMeeting);
+
+  return startMeetingMinutes >= startWorkMinutes && startMeetingMinutes + meetingTimeMinutes <= endWorkMinutes;
+}
+
+MeetTime('8:0', '10:0', '8:0', 120);
