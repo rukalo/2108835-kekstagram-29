@@ -1,3 +1,6 @@
-import {renderThumbnails} from './thumbnail.js';
 
-renderThumbnails();
+// import {renderThumbnails} from './thumbnail.js';
+import { renderGalary } from './galary.js';
+
+// renderThumbnails();
+renderGalary();

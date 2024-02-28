@@ -29,5 +29,6 @@ const createRandomIdGenerator = (minId, maxId) => {
 
 const getRandomArrayElement = (array) => array[getRandomNumber(0, array.length - 1)];
 
+const isEscKeydown = (evt) => evt.key === 'Escape';
 
-export {getRandomNumber, createRandomIdGenerator, getRandomArrayElement};
+export {getRandomNumber, createRandomIdGenerator, getRandomArrayElement, isEscKeydown};
