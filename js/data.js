@@ -1,60 +1,85 @@
-import {getRandomNumber, createRandomIdGenerator, getRandomArrayElement} from './util.js';
+import { generateCommentId, generatePhotoId, getRandomArrayElement, getRandomInteger, createRandomIdFromRangeGenerator } from './utils.js';
 
-const COUNT_PHOTOS = 25;
-const USER_NAMES = [
-  'Антон',
-  'Игорь',
-  'Олег',
-  'Станислав',
-  'Владимир',
-  'Александр'
-];
-const PHOTO_DESCRIPTIONS = [
-  'Мы в горах',
-  'Отдыхаем на море',
-  'В походе',
-  'Яркий зимний день'
-];
-const PHOTO_COMMENTS = [
-  'Классная фотка',
-  'Ух, сейчас бы на море',
-  'Горизонт завален...',
-  'Снимок переэкспонирован!'
-];
-const generatePhotoId = createRandomIdGenerator(1, 25);
+const OBJECTS_COUNT = 25;
 
-const generateCommentId = createRandomIdGenerator(1, 1000);
-
-const generateDescription = () => getRandomArrayElement(PHOTO_DESCRIPTIONS);
-
-const generateUrl = (photoId) => `photos/${photoId}.jpg`;
-
-const generateLikes = () => getRandomNumber(15, 200);
-
-const generateAvatarUrl = () => `img/avatar-${getRandomNumber(1, 200)}.svg`;
-
-const generateComment = () => ({
-  id: generateCommentId(),
-  avatar: generateAvatarUrl(),
-  message: getRandomArrayElement(PHOTO_COMMENTS),
-  name: getRandomArrayElement(USER_NAMES)
-});
-
-const generateComments = () => Array.from({length: getRandomNumber(0, 30)}, generateComment);
-
-const generatePhoto = () => {
-  const id = generatePhotoId();
-
-  return {
-    id: id,
-    url: generateUrl(id),
-    description: generateDescription(),
-    likes: generateLikes(),
-    comments: generateComments()
-  };
+const DESCRIPTIONS = {
+  firstWord: [
+    'истлевший',
+    'зловещий',
+    'заклятый',
+    'превозносящий',
+    'гигантский',
+    'смеющийся',
+    'хтонический',
+    'пробужденный',
+    'сладковещательный',
+    'подлый'
+  ],
+  secondWord: [
+    'попугай',
+    'гром',
+    'поедатель',
+    'предвестник',
+    'ужас',
+    'пенёк',
+    'морж',
+    'перст',
+    'тлен',
+    'гигант'
+  ],
+  thirdWord: [
+    'ярости',
+    'безумия',
+    'упадка',
+    'горести',
+    'разбоя',
+    'гигантизма',
+    'удачи',
+    'смелости',
+    'апатии',
+    'вольнодумства',
+  ],
 };
 
-const generatePhotos = () => Array.from({length: COUNT_PHOTOS}, generatePhoto);
+const COMMENT_MESSAGES = [
+  'Всё отлично!',
+  'В целом всё неплохо. Но не всё.',
+  'Когда вы делаете фотографию, хорошо бы убирать палец из кадра.',
+  'В конце концов это просто непрофессионально.',
+  'Моя бабушка случайно чихнула с фотоаппаратом в руках и у неё получилась фотография лучше.',
+  'Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.',
+  'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!',
+];
 
-export {generatePhotos};
+const AUTHORS = [
+  'Консул',
+  'Ламия Брон',
+  'Мартин Силен',
+  'Федман Кассад',
+  'Сол Вайнтрауб',
+  'Ленар Хойт',
+];
 
+const createComment = () => ({
+  id: generateCommentId(),
+  avatar: `img/avatar-${getRandomInteger(1, 6)}.svg`,
+  message: getRandomArrayElement(COMMENT_MESSAGES),
+  name: getRandomArrayElement(AUTHORS)
+});
+
+const generateCommentsArray = () => Array.from({ length: getRandomInteger(0, 30) }, createComment);
+
+const createPhoto = (photoIrlIdGenerator) => ({
+  id: generatePhotoId(),
+  url: `photos/${photoIrlIdGenerator()}.jpg`,
+  description: `На фото: ${getRandomArrayElement(DESCRIPTIONS.firstWord)} ${getRandomArrayElement(DESCRIPTIONS.secondWord)} ${getRandomArrayElement(DESCRIPTIONS.thirdWord)}.`,
+  likes: getRandomInteger(15, 200),
+  comments: generateCommentsArray()
+});
+
+const generatePhotosArray = () => {
+  const photoIrlIdGenerator = createRandomIdFromRangeGenerator(1, OBJECTS_COUNT);
+  return Array.from({ length: OBJECTS_COUNT }, () => createPhoto(photoIrlIdGenerator));
+};
+
+export { generatePhotosArray };
