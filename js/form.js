@@ -1,109 +1,3 @@
-import { resetScale, ScaleControl } from './scale.js';
-
-// const form = document.querySelector('.img-upload__form');
-// const uploadInput = document.querySelector('.img-upload__input');
-// const overlay = document.querySelector('.img-upload__overlay');
-// const closeButton = document.querySelector('.img-upload__cancel');
-// const hashtagField = document.querySelector('.text__hashtags');
-// const commentField = document.querySelector('.text__description');
-
-
-// const CLASS_HIDDEN = 'hidden';
-// const CLASS_MODAL_OPEN = 'modal-open';
-
-// const MAX_HASHTAG_COUNT = 5;
-// const VALID_SYMBOLS = /^#[a-zа-яё0-9]{1,19}$/i;
-// const ErrorText = {
-//   INVALID_COUNT: `Максимум ${MAX_HASHTAG_COUNT} хэштегов` ,
-//   NOT_UNIQUE: 'Хэштеги должны быть уникальны',
-//   INVALID_PATTERN: 'Неправильный хэштег',
-
-// };
-
-// const pristine = new Pristine(form, {
-//   classTo: 'img-upload__field-wrapper',
-//   errorTextParent: 'img-upload__field-wrapper',
-//   errorTextClass: 'img-upload__field-wrapper--error',
-// }, false);
-
-// const textFieldFocused = () =>
-//   document.activeElement === hashtagField ||
-//   document.activeElement === commentField;
-
-// const normalizeTags = (tagString) => tagString.trim().split(' ').filter((tag) => Boolean(tag.lenght));
-
-// const hasValidCount = (value) => normalizeTags(value).lenght <= MAX_HASHTAG_COUNT;
-
-// const hasValidTags = (value) => normalizeTags(value).every((tag) => VALID_SYMBOLS.test(tag));
-
-// const hasUniqueTags = (value) => {
-//   const lowerCaseTags = normalizeTags(value).map((tag) => tag.toLowerCase());
-//   return lowerCaseTags.lenght === new Set(lowerCaseTags).size;
-// };
-
-// pristine.addValidator(
-//   hashtagField,
-//   hasValidCount,
-//   ErrorText.INVALID_COUNT,
-//   1,
-//   true
-// );
-
-// pristine.addValidator(
-//   hashtagField,
-//   hasValidTags,
-//   ErrorText.INVALID_PATTERN,
-//   true
-// );
-
-// pristine.addValidator(
-//   hashtagField,
-//   hasUniqueTags,
-//   ErrorText.NOT_UNIQUE,
-//   true
-// );
-
-// const onDocumentKeydown = (evt) => {
-//   if (evt.key === 'Espace' && !textFieldFocused()) {
-//     evt.preventDefault();
-//     closeModal();
-//   }
-// };
-
-// const onCloseBtnClick = (evt) => {
-//   evt.preventDefault();
-//   closeModal();
-// };
-
-// const showModal = () => {
-//   overlay.classList.remove(CLASS_HIDDEN);
-//   document.body.classList.add(CLASS_MODAL_OPEN);
-//   document.addEventListener('keydown', onDocumentKeydown);
-//   closeButton.addEventListener('click', onCloseBtnClick);
-// };
-
-// function closeModal() {
-//   form.reset();
-//   resetScale();
-//   resetEffect();
-//   overlay.classList.add(CLASS_HIDDEN);
-//   document.body.classList.remove(CLASS_MODAL_OPEN);
-//   document.removeEventListener('keydown', onDocumentKeydown);
-//   closeButton.removeEventListener('click', onCloseBtnClick);
-//   uploadInput.value = '';
-// }
-
-// const loadPicture = () => {
-//   uploadInput.onchange = () => {
-//     showModal();
-//     ScaleControl();
-//   };
-// };
-
-// export { loadPicture };
-
-//// ЗДЕСЬ НАЧИНАЕТСЯ ДРУГОЙ КОД
-
 import { isEscapeKey } from './utils.js';
 
 const imgUploadForm = document.getElementById('upload-select-image');
@@ -112,10 +6,10 @@ const uploadOverlay = imgUploadForm.querySelector('.img-upload__overlay');
 const uploadCancel = imgUploadForm.querySelector('.img-upload__cancel');
 const textHashtag = imgUploadForm.querySelector('.text__hashtags');
 const textDescription = imgUploadForm.querySelector('.text__description');
-
 const preview = imgUploadForm.querySelector('.img-upload__preview').querySelector('img');
-
-
+const scaleControlSmaller = imgUploadForm.querySelector('.scale__control--smaller');
+const scaleControlBigger = imgUploadForm.querySelector('.scale__control--bigger');
+const scaleControlValue = imgUploadForm.querySelector('.scale__control--value');
 // const effectsPreviews = imgUploadForm.querySelectorAll('.effects__preview');
 
 const effectLevelSlider = imgUploadForm.querySelector('.effect-level__slider');
@@ -123,9 +17,19 @@ const effectLevelValue = imgUploadForm.querySelector('.effect-level__value');
 const imgUploadEffectLevel = imgUploadForm.querySelector('.img-upload__effect-level');
 const effectItems = imgUploadForm.querySelectorAll('.effects__radio');
 
+const imgUploadSubmit = imgUploadForm.querySelector('.img-upload__submit');
+const successMessageTemplate = document.querySelector('#success').content.querySelector('.success');
+const errorMessageTemplate = document.querySelector('#error').content.querySelector('.error');
+
+const successMessage = successMessageTemplate.cloneNode(true);
+const successButton = successMessage.querySelector('.success__button');
+const errorMessage = errorMessageTemplate.cloneNode(true);
+const errorButton = errorMessage.querySelector('.error__button');
+
+
 const CLASS_HIDDEN = 'hidden';
 const CLASS_MODAL_OPEN = 'modal-open';
-
+const SCALE_STEP = 0.25;
 const HASHTAGS_AMOUNT = 5;
 
 let currentEffect = 'none';
@@ -137,7 +41,7 @@ const resetEffects = () => {
 };
 
 noUiSlider.create(effectLevelSlider, {
-  start: [0],
+  start: [100],
   connect: 'lower',
   range: {
     'min': 0,
@@ -146,40 +50,16 @@ noUiSlider.create(effectLevelSlider, {
   step: 1
 });
 
-/**
- * @param {number} max
- */
-
-const switchSliderMax = (max) => {
+const switchSliderOpt = (start, min, max, step) => {
   effectLevelSlider.noUiSlider.updateOptions({
+    start: [start],
     range: {
-      'min': 0,
+      'min': min,
       'max': max
-    }
+    },
+    step
   });
 };
-
-for (const item of effectItems) {
-  item.onchange = () => {
-    currentEffect = item.value;
-    resetEffects();
-    if (item.value !== 'none') {
-      imgUploadEffectLevel.classList.remove(CLASS_HIDDEN);
-    } else {
-      imgUploadEffectLevel.classList.add(CLASS_HIDDEN);
-    }
-    switch (currentEffect) {
-      case 'phobos':
-        switchSliderMax(300);
-        break;
-      case 'heat':
-        switchSliderMax(200);
-        break;
-      default:
-        switchSliderMax(100);
-    }
-  };
-}
 
 function changeEffect(level) {
   switch (currentEffect) {
@@ -193,10 +73,10 @@ function changeEffect(level) {
       preview.style.filter = `invert(${level}%)`;
       break;
     case 'phobos':
-      preview.style.filter = `blur(${level / 100}px)`;
+      preview.style.filter = `blur(${level}px)`;
       break;
     case 'heat':
-      preview.style.filter = `brightness(${1 + level / 100})`;
+      preview.style.filter = `brightness(${level})`;
       break;
     case 'none':
       preview.style.filter = '';
@@ -223,10 +103,6 @@ const pristine = new Pristine(imgUploadForm, {
   errorTextParent: 'img-upload__field-wrapper',
   errorTextClass: 'error-text'
 });
-
-/**
- * @param {string} hashtag
- */
 
 const checkHashtag = (hashtag) => {
   const lowerCaseHashtag = hashtag.toLowerCase().trim();
@@ -265,12 +141,113 @@ pristine.addValidator(textHashtag, (value) => {
   return test.noDublicates;
 }, validationErrors.dublicate, 3, true);
 
+// Отправка данных
+
+const blockSubmitButton = () => {
+  imgUploadSubmit.disabled = true;
+};
+const unblockSubmitButton = () => {
+  imgUploadSubmit.disabled = false;
+};
+
+
+const onSuccessKeydown = (evt) => {
+  if (isEscapeKey(evt)) {
+    evt.preventDefault();
+    closeSuccess();
+  }
+};
+
+const onErrorKeydown = (evt) => {
+  if (isEscapeKey(evt)) {
+    evt.preventDefault();
+    closeError();
+  }
+};
+
+const onSuccessBlur = (evt) => {
+  if (evt.target === successMessage) {
+    closeSuccess();
+  }
+};
+
+const onErrorBlur = (evt) => {
+  if (evt.target === errorMessage) {
+    closeError();
+  }
+};
+
+const onSuccessButtonClick = () => {
+  closeSuccess();
+};
+
+const onErrorButtonClick = () => {
+  closeError();
+};
+
+
+const openSuccess = () => {
+  document.body.appendChild(successMessage);
+  successMessage.addEventListener('click', onSuccessBlur);
+  successButton.addEventListener('click', onSuccessButtonClick);
+  document.removeEventListener('keydown', onDocumentKeydown);
+  document.addEventListener('keydown', onSuccessKeydown);
+};
+
+
+const openError = () => {
+  document.body.appendChild(errorMessage);
+  document.addEventListener('keydown', onErrorKeydown);
+  errorMessage.addEventListener('click', onErrorBlur);
+  errorButton.addEventListener('click', onErrorButtonClick);
+  document.removeEventListener('keydown', onDocumentKeydown);
+};
+
+function closeSuccess() {
+  successMessage.removeEventListener('click', onSuccessBlur);
+  successButton.removeEventListener('click', onSuccessButtonClick);
+  document.removeEventListener('click', onSuccessKeydown);
+  document.body.removeChild(successMessage);
+  closeModal();
+}
+
+function closeError() {
+  document.removeEventListener('keydown', onErrorKeydown);
+  errorMessage.removeEventListener('click', onErrorBlur);
+  errorButton.removeEventListener('click', onErrorButtonClick);
+  document.addEventListener('keydown', onDocumentKeydown);
+  document.body.removeChild(errorMessage);
+}
+
+const fetchImageData = () => {
+  const formData = new FormData(imgUploadForm);
+  try {
+    fetch('https://29.javascript.htmlacademy.pro/kekstagram',
+      {
+        method: 'POST',
+        body: formData
+      })
+      .then((response) => {
+        if (response.ok) {
+          unblockSubmitButton();
+          openSuccess();
+        } else {
+          unblockSubmitButton();
+          openError();
+        }
+      });
+  } catch (error) {
+    unblockSubmitButton();
+    openError();
+  }
+};
+
 imgUploadForm.addEventListener('submit', (evt) => {
   evt.preventDefault();
-
   const isValid = pristine.validate();
   if (isValid) {
-    imgUploadForm.submit();
+    blockSubmitButton();
+    fetchImageData();
   }
 });
 
@@ -284,6 +261,27 @@ imgUploadForm.addEventListener('submit', (evt) => {
 //   return undefined;
 // };
 
+function changeScale(scaleValue) {
+  scaleControlValue.value = `${scaleValue * 100}%`;
+  preview.style.transform = `scale(${scaleValue})`;
+}
+
+let currentScale = 1;
+
+function plusScale() {
+  if (currentScale < 1) {
+    currentScale += SCALE_STEP;
+    changeScale(currentScale);
+  }
+}
+
+function minusScale() {
+  if (currentScale > 0.25) {
+    currentScale -= SCALE_STEP;
+    changeScale(currentScale);
+  }
+}
+
 // const fillPreview = () => {
 //   const imageUrl = createImageUrl();
 //   preview.src = imageUrl;
@@ -294,14 +292,14 @@ imgUploadForm.addEventListener('submit', (evt) => {
 
 // Открытие-закрытие модалки
 
-const onDocumentKeydown = (evt) => {
+function onDocumentKeydown(evt) {
   if (document.activeElement !== textHashtag && document.activeElement !== textDescription) {
     if (isEscapeKey(evt)) {
       evt.preventDefault();
       closeModal();
     }
   }
-};
+}
 
 const onCloseBtnClick = (evt) => {
   evt.preventDefault();
@@ -313,11 +311,14 @@ function closeModal() {
   document.body.classList.remove(CLASS_MODAL_OPEN);
   document.removeEventListener('keydown', onDocumentKeydown);
   uploadCancel.removeEventListener('click', onCloseBtnClick);
+  changeScale(1);
   uploadInput.value = '';
-  resetScale();
-  resetEffects();
   currentEffect = 'none';
+  currentScale = 1;
+  resetEffects();
   effectItems[0].checked = true;
+  textHashtag.value = '';
+  textDescription.value = '';
   imgUploadEffectLevel.classList.add(CLASS_HIDDEN);
 }
 
@@ -326,13 +327,38 @@ const showModal = () => {
   document.body.classList.add(CLASS_MODAL_OPEN);
   document.addEventListener('keydown', onDocumentKeydown);
   uploadCancel.addEventListener('click', onCloseBtnClick);
+  scaleControlBigger.addEventListener('click', plusScale);
+  scaleControlSmaller.addEventListener('click', minusScale);
 };
 
 
 const loadPicture = () => {
+
+  for (const item of effectItems) {
+    item.addEventListener('change', () => {
+      currentEffect = item.value;
+      resetEffects();
+      if (item.value !== 'none') {
+        imgUploadEffectLevel.classList.remove(CLASS_HIDDEN);
+      } else {
+        imgUploadEffectLevel.classList.add(CLASS_HIDDEN);
+      }
+      switch (currentEffect) {
+        case 'phobos':
+          switchSliderOpt(3, 0, 3, 0.1);
+          break;
+        case 'heat':
+          switchSliderOpt(3, 1, 3, 0.1);
+          break;
+        default:
+          switchSliderOpt(100, 0, 100, 1);
+      }
+    });
+  }
+
   uploadInput.addEventListener('change', () => {
     showModal();
-    ScaleControl();
+    // fillPreview();
   });
 };
 
