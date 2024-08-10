@@ -1,11 +1,23 @@
-const createIdGenerator = () => {
-  let lastGeneratedId = 0;
-  return function () {
-    lastGeneratedId += 1;
-    return lastGeneratedId;
+/**
+ * @callback debouncedFunction
+ */
+
+/**
+ * @param {debouncedFunction} callback
+ * @param {number} timeoutDelay
+ */
+const debounce = (callback, timeoutDelay = 500) => {
+  let timeoutId;
+  return (...rest) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => callback.apply(this, rest), timeoutDelay);
   };
 };
 
+/**
+ * @param {number} a
+ * @param {number} b
+ */
 const getRandomInteger = (a, b) => {
   const lower = Math.ceil(Math.min(a, b));
   const upper = Math.floor(Math.max(a, b));
@@ -13,25 +25,6 @@ const getRandomInteger = (a, b) => {
   return Math.floor(result);
 };
 
-const createRandomIdFromRangeGenerator = (min, max) => {
-  const previousValues = [];
-  return function () {
-    let currentValue = getRandomInteger(min, max);
-    if (previousValues.length >= (max - min + 1)) {
-      return null;
-    }
-    while (previousValues.includes(currentValue)) {
-      currentValue = getRandomInteger(min, max);
-    }
-    previousValues.push(currentValue);
-    return currentValue;
-  };
-};
-
-const getRandomArrayElement = (elements) => elements[getRandomInteger(0, elements.length - 1)];
-const generateCommentId = createIdGenerator();
-const generatePhotoId = createIdGenerator();
-
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
-export { generateCommentId, generatePhotoId, getRandomArrayElement, getRandomInteger, createRandomIdFromRangeGenerator, isEscapeKey };
+export { debounce, getRandomInteger, isEscapeKey };

@@ -1,9 +1,14 @@
 import { openBigPicture } from './big-picture.js';
 
+export const FETCH_ERROR_MESSAGE = 'Не удалось загрузить фотографии пользователей.';
+
 const picturesContainer = document.querySelector('.pictures');
 const pictureTemplate = document.querySelector('#picture');
 const pictureItem = pictureTemplate.content.querySelector('.picture');
 
+/**
+ * @param {object[]} pictures
+ */
 const renderPictures = (pictures) => {
   const picturesFragment = document.createDocumentFragment();
   pictures.forEach((picture) => {
